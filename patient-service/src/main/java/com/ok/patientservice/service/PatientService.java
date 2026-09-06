@@ -5,6 +5,7 @@ import com.ok.patientservice.dto.PatientResponseDTO;
 import com.ok.patientservice.exception.EmailAlreadyExistsException;
 import com.ok.patientservice.exception.PatientNotFoundException;
 import com.ok.patientservice.grpc.BillingServiceGrpcClient;
+import com.ok.patientservice.kafka.KafkaProducer;
 import com.ok.patientservice.mapper.PatientMapper;
 import com.ok.patientservice.model.Patient;
 import com.ok.patientservice.repo.PatientRepo;
@@ -22,12 +23,14 @@ public class PatientService {
 	private final PatientRepo patientRepo;
 
 	private final BillingServiceGrpcClient billingServiceGrpcClient;
+	private final KafkaProducer kafkaProducer;
 
 	public PatientService(PatientRepo patientRepo,
-	                      BillingServiceGrpcClient billingServiceGrpcClient) {
+	                      BillingServiceGrpcClient billingServiceGrpcClient,
+	                      KafkaProducer kafkaProducer) {
 		this.patientRepo = patientRepo;
 		this.billingServiceGrpcClient = billingServiceGrpcClient;
-
+		this.kafkaProducer = kafkaProducer;
 	}
 	//* dependency injection end
 
@@ -54,6 +57,8 @@ public class PatientService {
 						newPatient.getId().toString(),
 						newPatient.getName(),
 						newPatient.getEmail());
+
+		kafkaProducer.sendEvent(newPatient);
 
 		return PatientMapper.toDTO(newPatient);
 	}
