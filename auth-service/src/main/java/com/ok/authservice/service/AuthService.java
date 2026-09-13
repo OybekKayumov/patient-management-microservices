@@ -1,7 +1,8 @@
 package com.ok.authservice.service;
 
 import com.ok.authservice.dto.LoginRequestDTO;
-import com.ok.authservice.model.User;
+import com.ok.authservice.util.JwtUtil;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -10,16 +11,26 @@ import java.util.Optional;
 public class AuthService {
 
 	private final UserService userService;
+	private final PasswordEncoder passwordEncoder;
+	private final JwtUtil jwtUtil;
 
-	public AuthService(UserService userService) {this.userService = userService;}
+	public AuthService(UserService userService,
+	                   PasswordEncoder passwordEncoder,
+	                   JwtUtil jwtUtil) {
+		this.userService = userService;
+		this.passwordEncoder = passwordEncoder;
+		this.jwtUtil = jwtUtil;
+	}
 
 	public Optional<String> authenticate(LoginRequestDTO loginRequestDTO){
 
-		Optional<User> user = userService.findByEmail(loginRequestDTO.getEmail())
+		Optional<String> token = userService
+						.findByEmail(loginRequestDTO.getEmail())
 						.filter(u -> passwordEncoder.matches(
-										loginRequestDTO.getPassword(), u.getPassword()));
+										loginRequestDTO.getPassword(), u.getPassword()))
+						.map(u -> jwtUtil.generateToken(u.getEmail(), u.getRole()));
 
-		return null;
 
+		return token;
 	}
 }
