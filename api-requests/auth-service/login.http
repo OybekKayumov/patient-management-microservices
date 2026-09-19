@@ -1,5 +1,5 @@
 ### Login request to retrieve a toekn
-POST http://localhost:4005/login
+POST http://localhost:4004/auth/login
 Content-Type: application/json
 
 {
