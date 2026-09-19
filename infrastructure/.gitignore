@@ -4,7 +4,8 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
-/cdk.out
+cdk.out/
+**/cdk.out/
 
 ### STS ###
 .apt_generated
